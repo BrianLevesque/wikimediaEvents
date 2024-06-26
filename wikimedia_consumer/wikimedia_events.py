@@ -54,39 +54,50 @@ def main():
 
     #Output the top five domains, along with counts for each.
 
-    #domain_df = df.groupBy(col("domain")).count("domain")).orderBy(F.desc(col("count"))).limit(5)
+    #domain_df = df.groupBy(col("domain")).count()
+
+    #domain_top5 = domain_df.orderBy(col("count").desc()).limit(5)
 
     #Output the top five users, based on the length of content they have added (sum of length_diff).
 
-    #user_df = df.groupBy(col("user").sum("length_diff").orderBy(F.desc("sum")).limit(5)
+    #user_df = df.groupBy(col("user")).sum("length_diff")
+
+    #user_top5 = user_df.orderBy(col("sum(length_diff)").desc()).limit(5)
 
     #Output the total number of events, the percent of events by bots, the average length_diff, the minimum length_diff, and the maximum length_diff. (In this example, percent_bot is represented as 0-1, rather than 0-100.
-
     
 
 
-
-                                                
+    #calculating average, min, max values for 'length_diff" column for bots
+    """
+    bot_stats = df.select(
+        F.count(col("bot")).alias("total_count"),
+        F.count_if(col('bot') == True)/F.count(col("bot")).alias("percent_bot"),
+        F.avg("length_diff").alias("average_length_diff"),
+        F.min("length_diff").alias("min_length_diff"),
+        F.max("length_diff").alias("max_length_diff"))
+                                              
 
 
     
-    query = domain_df \
+    query = bot_stats \
         .writeStream \
+        .outputMode("complete")\
         .format("console") \
-        .option("truncate", False) \
+        .option("truncate", True) \
         .start() \
         .awaitTermination()
-        #.outputMode("complete")\
-
-    """df.writeStream \
-    .outputMode("append")\
-    .option("checkpointLocation","output")\
-    .format("csv")\
-    .option("path","./output")\
-    .option("header",True)\
-    .trigger(processingTime="10 seconds")\
-    .start()\
-    .awaitTermination()"""
+        
+"""
+    df.writeStream \
+        .outputMode("append")\
+        .option("checkpointLocation","output")\
+        .format("csv")\
+        .option("path","./output")\
+        .option("header",True)\
+        .trigger(processingTime="10 seconds")\
+        .start()\
+        .awaitTermination()
         
     
 if __name__ == "__main__":
